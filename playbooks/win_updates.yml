@@ -1,0 +1,17 @@
+---
+- name: Windows Update Playbook
+  hosts: windows
+  gather_facts: no
+  tasks:
+    - name: Check and install all available Windows updates
+      win_updates:
+        category_names:
+          - SecurityUpdates
+          - CriticalUpdates
+        reboot: yes
+        reboot_timeout: 600
+      register: update_result
+
+    - name: Display update result
+      debug:
+        var: update_result
