@@ -1,0 +1,24 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Upgrade all packages
+  apt:
+    upgrade: dist
+  register: upgrade_result
+
+- name: Show upgrade result
+  debug:
+    var: upgrade_result
+
+- name: Reboot if required
+  reboot:
+    msg: "Reboot initiated by Ansible after updates"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 60
+    test_command: whoami
+  when: "'reboot-required' in upgrade_result.stdout or upgrade_result.changed"
