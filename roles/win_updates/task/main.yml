@@ -1,0 +1,12 @@
+---
+- name: Ensure all pending Windows updates are installed
+  win_updates:
+    category_names:
+      - SecurityUpdates
+      - CriticalUpdates
+    reboot: yes
+  register: update_result
+
+- name: Show update result
+  debug:
+    var: update_result
