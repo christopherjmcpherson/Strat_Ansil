@@ -1,0 +1,30 @@
+---
+- name: Audit Windows servers for missing updates
+  hosts: windows_servers
+  gather_facts: yes
+  tasks:
+
+    - name: List pending Security updates
+      ansible.windows.win_updates:
+        category_names:
+          - SecurityUpdates
+        state: searched
+      register: pending_updates
+
+    - name: Save pending updates to JSON
+      ansible.builtin.copy:
+        content: "{{ pending_updates.updates | to_nice_json }}"
+        dest: "/tmp/{{ inventory_hostname }}_pending_updates.json"
+
+    - name: Create summary message
+      set_fact:
+        updates_summary: |
+          Host: {{ inventory_hostname }}
+          Pending Updates: {{ pending_updates.updates | map(attribute='title') | list | join(', ') | default('None') }}
+
+    - name: Add host summary to overall report
+      ansible.builtin.lineinfile:
+        path: "/tmp/windows_patch_compliance_report.txt"
+        line: "{{ updates_summary }}"
+        create: yes
+        insertafter: EOF
